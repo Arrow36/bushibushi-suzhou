@@ -1,100 +1,47 @@
-# vinext-starter
+# 不时不食
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+面向苏州人的全年时令食物时间轴。顺着月份与二十四节气上下浏览，查看本地食物的上市时间和最佳赏味期。
 
-## Prerequisites
+## 在线访问
 
-- Node.js `>=22.13.0`
+[https://arrow36.github.io/bushibushi-suzhou/](https://arrow36.github.io/bushibushi-suzhou/)
 
-## Quick Start
+## 主要体验
 
-```bash
-npm install
-npm run dev
-npm run build
-```
+- 上下滚动、拖动整年时间轴，移动端支持触控操作
+- 月份与节气共用一套纵向刻度
+- 用浅色带表示上市期，深色带表示最佳赏味期
+- 菜牌随时间轴浮现，并与对应食物的色带连接
+- 点击左上角品牌或右下角圆形按钮，可回到当前时节
 
-This starter does not use `wrangler.jsonc`.
+## 当前收录
 
-## Included Shape
+冬笋、太湖白鱼、洞庭山碧螺春、马兰头、香椿、东山白沙枇杷、吴中杨梅、翠冠梨、鸡头米、鲜藕、红菱、阳澄湖大闸蟹、冬酿酒。
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+上市时间以苏州本地公开报道为参考；当年暂无可靠报道时，暂用常年节令数据。
 
-## Workspace Auth Headers
+## 本地开发
 
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
+需要 Node.js 22.13.0 或更高版本。
 
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
+    npm install
+    npm run dev
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+验证正式构建：
 
-Treat the full name as optional and fall back to email when it is absent:
+    npm run build
 
-```tsx
-import { headers } from "next/headers";
+## GitHub Pages
 
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
+生成静态页面：
 
-  const displayName = fullName ?? email;
-  // ...
-}
-```
+    npm run build:pages
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+推送到 main 分支后，.github/workflows/deploy-pages.yml 会自动构建并发布 GitHub Pages。
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+## 目录说明
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- app/：页面组件、食物数据与视觉样式
+- public/：手绘食物插画与站点图标
+- github-pages/：静态站点入口
+- .github/workflows/：GitHub Pages 自动部署配置
